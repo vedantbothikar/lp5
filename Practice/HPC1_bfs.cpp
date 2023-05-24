@@ -2,84 +2,87 @@
 #include <queue>
 #include <vector>
 #include <omp.h>
-
 using namespace std;
 
-#define MAXN 100000
+#define MAX 100000
 
-vector<int> adj[MAXN]; // Adjacency list representation of graph
+vector<int> adj[MAX];
 
-void bfs_parallel(int source) {
+void bfs_parallel(int source)
+{
 
-    bool visited[MAXN] = {false}; // Array to keep track of visited nodes
-    queue<int> q; // Queue to store nodes to visit
-
+    bool visited[MAX] = {false};
     visited[source] = true;
+
+    queue<int> q;
     q.push(source);
 
-    cout<<"Visited nodes: ";
-
-    while (!q.empty()) {
-        int u = q.front();
-
-        cout<<u<<" ";
-
+    while (!q.empty())
+    {
+        int curr = q.front();
         q.pop();
 
-        #pragma omp parallel for
-        for (int i = 0; i < adj[u].size(); i++) {
-            int v = adj[u][i];
+        cout << curr << " ";
 
-            #pragma omp critical
+#pragma omp parallel for
+        for (int i = 0; i < adj[curr].size(); i++)
+        {
+            int next = adj[curr][i];
+
+#pragma omp critical
+            if (!visited[next])
             {
-                if (!visited[v]) {
-                    visited[v] = true;
-                    q.push(v);
-                }
+                visited[next] = true;
+                q.push(next);
             }
         }
     }
 
-    cout<<endl;
+    cout << endl;
 }
 
-void bfs_serial(int source) {
+void bfs_serial(int source)
+{
 
-    bool visited[MAXN] = {false}; // Array to keep track of visited nodes
-    queue<int> q; // Queue to store nodes to visit
-
+    bool visited[MAX] = {false};
     visited[source] = true;
+
+    queue<int> q;
     q.push(source);
 
-    cout<<"Visited nodes: ";
+    while (!q.empty())
+    {
 
-    while (!q.empty()) {
-        int u = q.front();
-
-        cout<<u<<" ";
-
+        int curr = q.front();
         q.pop();
 
-        for (int i = 0; i < adj[u].size(); i++) {
-            int v = adj[u][i];
+        cout << curr << " ";
 
-            if (!visited[v]) {
-                visited[v] = true;
-                q.push(v);
+        for (int i = 0; i < adj[curr].size(); i++)
+        {
+            int next = adj[curr][i];
+
+            if (!visited[next])
+            {
+                visited[next] = true;
+                q.push(next);
             }
         }
     }
 
-    cout<<endl;
+    cout << endl;
 }
 
-int main() {
-    int n, m;
+int main()
+{
+    int n, m; // number of nodes and edges
     cin >> n >> m;
 
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < m; i++)
+    {
         int u, v;
         cin >> u >> v;
+
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
@@ -87,17 +90,16 @@ int main() {
     int source;
     cin >> source;
 
-    double start_time = omp_get_wtime();
+    double starttime = omp_get_wtime();
     bfs_serial(source);
-    double mid_time = omp_get_wtime();
+    double endtime = omp_get_wtime();
 
-    cout << "Time taken for serial BFS: " << (mid_time - start_time) << " seconds" << endl;
+    cout << "Time taken: " << endtime - starttime << endl;
 
     bfs_parallel(source);
-    double end_time  = omp_get_wtime();
+    double finalendtime = omp_get_wtime();
 
-    cout << "Time taken for parallel BFS: " << (end_time - mid_time) << " seconds" << endl;
-
+    cout << "Time taken: " << finalendtime - endtime << endl;
 
     return 0;
 }

@@ -1,15 +1,41 @@
 #include <iostream>
 #include <omp.h>
-
 using namespace std;
 
-void bubble_sort_parallel(int arr[], int n) {
+void bubble_serial(int *arr, int n)
+{
+
     bool swapped = true;
-    while (swapped) {
+
+    while (swapped)
+    {
         swapped = false;
+
+        for (int i = 0; i < n - 1; i++)
+        {
+            if (arr[i] > arr[i + 1])
+            {
+                swap(arr[i], arr[i + 1]);
+                swapped = true;
+            }
+        }
+    }
+}
+
+void bubble_parallel(int *arr, int n)
+{
+
+    bool swapped = true;
+
+    while (swapped)
+    {
+        swapped = false;
+
 #pragma omp parallel for shared(arr) private(swapped)
-        for (int i = 0; i < n - 1; i++) {
-            if (arr[i] > arr[i + 1]) {
+        for (int i = 0; i < n - 1; i++)
+        {
+            if (arr[i] > arr[i + 1])
+            {
                 swap(arr[i], arr[i + 1]);
                 swapped = true;
             }
@@ -17,42 +43,25 @@ void bubble_sort_parallel(int arr[], int n) {
     }
 }
 
-void bubble_sort_serial(int arr[], int n) {
-    bool swapped = true;
-    while (swapped) {
-        swapped = false;
-        for (int i = 0; i < n - 1; i++) {
-            if (arr[i] > arr[i + 1]) {
-                swap(arr[i], arr[i + 1]);
-                swapped = true;
-            }
-        }
-    }
-}
+int main()
+{
 
-int main() {
-    int arr[] = {5, 4, 3, 2, 1};
+    int arr1[] = {5, 4, 3, 2, 1};
     int arr2[] = {5, 4, 3, 2, 1};
-    int n = sizeof(arr) / sizeof(arr[0]);
 
-    double start_time = omp_get_wtime();
-    bubble_sort_serial(arr, n);
-    double mid_time = omp_get_wtime();
+    int n = 5;
 
-    cout << "Time taken by serial Bubble sort: " << mid_time - start_time << " seconds" << endl;
+    double starttime = omp_get_wtime();
+    bubble_serial(arr1, n);
 
-    bubble_sort_parallel(arr2,n);
+    double endtime = omp_get_wtime();
 
-    double end_time = omp_get_wtime();
+    cout << "Time taken by serial Bubble sort: " << endtime - starttime << " seconds" << endl;
 
-    cout << "Time taken by parallel Bubble sort: " << end_time - mid_time << " seconds" << endl;
+    bubble_parallel(arr2, n);
+    double finalendtime = omp_get_wtime();
 
-
-    cout << "Sorted array: ";
-    for (int i = 0; i < n; i++) {
-        cout << arr[i] << " ";
-    }
-    cout << endl;
+    cout << "Time taken by serial Bubble sort: " << finalendtime - endtime << " seconds" << endl;
 
     return 0;
 }
